@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0e1116;
+  color: #e8e6df;
+  /* Subtle dossier grid — quiet, never decorative noise. */
+  background-image:
+    linear-gradient(to right, rgba(35, 42, 51, 0.35) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(35, 42, 51, 0.35) 1px, transparent 1px);
+  background-size: 56px 56px;
+  background-position: center top;
+}
+
+::selection {
+  background: #e0a82e;
+  color: #0e1116;
+}
+
+/* Thin gold focus ring for keyboard users */
+*:focus-visible {
+  outline: 2px solid #e0a82e;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Eyebrow / label utility used across the app */
+.eyebrow {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #8b95a1;
+}
