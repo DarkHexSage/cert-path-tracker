@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import Stats from "@/components/Stats";
 import ProgressTracker from "@/components/ProgressTracker";
+import Resources from "@/components/Resources";
 import SignOutButton from "@/components/SignOutButton";
 
 export const dynamic = "force-dynamic";
@@ -49,6 +50,10 @@ export default async function DashboardPage() {
       </section>
 
       <ProgressTracker userId={user.id} initialCompleted={completed} />
+
+      <div className="mt-16">
+        <Resources />
+      </div>
     </main>
   );
 }

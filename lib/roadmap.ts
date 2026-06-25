@@ -11,6 +11,7 @@ export interface RoadmapItem {
   meta?: string; // provider / time / extra
   link?: string;
   optional?: boolean;
+  image?: string; // optional custom badge image path; defaults to /badges/<id>.png
 }
 
 export interface Month {

@@ -1,7 +1,7 @@
 "use client";
 
 import { ROADMAP, type RoadmapItem } from "@/lib/roadmap";
-import Stamp from "./Stamp";
+import BadgeMedia from "./BadgeMedia";
 
 function ExternalIcon() {
   return (
@@ -56,7 +56,7 @@ function ItemRow({
     <div className="flex items-start gap-3">
       {isBadge ? (
         <span className="shrink-0">
-          <Stamp earned={done} size={34} />
+          <BadgeMedia id={item.id} earned={done} src={item.image} size={38} />
         </span>
       ) : (
         <TaskBox done={done} />

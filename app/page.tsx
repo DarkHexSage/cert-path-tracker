@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Stats from "@/components/Stats";
 import RoadmapTimeline from "@/components/RoadmapTimeline";
+import Resources from "@/components/Resources";
 import { TOTAL_BADGES } from "@/lib/roadmap";
 
 const EMPTY = new Set<string>();
@@ -75,6 +76,11 @@ export default function Home() {
           <span className="font-mono text-xs text-muted">6 months · 30+ steps</span>
         </div>
         <RoadmapTimeline completed={EMPTY} readOnly />
+      </section>
+
+      {/* Free university — YouTube */}
+      <section className="mt-20">
+        <Resources />
       </section>
 
       {/* Closing CTA */}
