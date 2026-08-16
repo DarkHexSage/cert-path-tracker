@@ -56,7 +56,7 @@ function ItemRow({
     <div className="flex items-start gap-3">
       {isBadge ? (
         <span className="shrink-0">
-          <BadgeMedia id={item.id} earned={done} src={item.image} size={38} />
+          <BadgeMedia id={item.id} earned={done} src={item.image} size={56} />
         </span>
       ) : (
         <TaskBox done={done} />
