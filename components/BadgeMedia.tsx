@@ -7,7 +7,7 @@ export default function BadgeMedia({
   id,
   earned,
   src,
-  size = 96,
+  size = 120,
 }: {
   id: string;
   earned: boolean;
