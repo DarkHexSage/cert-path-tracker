@@ -1,13 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AuthShell, Field } from "@/components/AuthForm";
 
-export default function SignUpPage() {
+function safeNext(n: string | null) {
+  return n && n.startsWith("/") && !n.startsWith("//") ? n : "/dashboard";
+}
+
+function SignUpForm() {
   const router = useRouter();
+  const next = safeNext(useSearchParams().get("next"));
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,72 +23,60 @@ export default function SignUpPage() {
   async function handleSignUp() {
     setError(null);
     setNotice(null);
-
-    if (!username.trim()) return setError("Pick a username so the path can greet you.");
+    if (!username.trim()) return setError("Pick a username so we can greet you.");
     if (password.length < 6) return setError("Use at least 6 characters for your password.");
 
     setLoading(true);
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await createClient().auth.signUp({
       email: email.trim(),
       password,
       options: {
         data: { username: username.trim() },
-        emailRedirectTo:
-          typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : undefined,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
       },
     });
     setLoading(false);
-
-    if (error) {
-      setError(error.message);
-      return;
-    }
+    if (error) return setError(error.message);
     if (data.session) {
-      router.push("/dashboard");
+      router.push(next);
       router.refresh();
     } else {
-      setNotice("Account created. Check your email to confirm, then log in.");
+      setNotice("Account created! Check your email to confirm, then log in.");
     }
   }
 
   return (
-    <AuthShell title="Start the path" subtitle="One account. Your progress, saved forever.">
-      <Field label="Username" value={username} onChange={setUsername} placeholder="how the path greets you" />
-      <Field
-        label="Email"
-        type="email"
-        value={email}
-        onChange={setEmail}
-        placeholder="you@example.com"
-      />
+    <AuthShell title="Create your free account" subtitle="One account. All your courses and progress, saved.">
+      <Field label="Username" value={username} onChange={setUsername} placeholder="How should we call you?" autoComplete="nickname" />
+      <Field label="Email" type="email" value={email} onChange={setEmail} placeholder="you@example.com" autoComplete="email" />
       <Field
         label="Password"
         type="password"
         value={password}
         onChange={setPassword}
-        placeholder="at least 6 characters"
+        placeholder="At least 6 characters"
         onEnter={handleSignUp}
+        autoComplete="new-password"
       />
-
-      {error && <p className="font-mono text-xs text-red-400">{error}</p>}
-      {notice && <p className="font-mono text-xs text-green">{notice}</p>}
-
-      <button
-        type="button"
-        onClick={handleSignUp}
-        disabled={loading}
-        className="w-full rounded-md bg-gold py-3 font-mono text-sm font-bold uppercase tracking-wider text-ink transition-transform hover:scale-[1.02] disabled:opacity-60"
-      >
+      {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
+      {notice && <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{notice}</p>}
+      <button type="button" onClick={handleSignUp} disabled={loading} className="btn-primary w-full py-3">
         {loading ? "Creating…" : "Create account"}
       </button>
-
-      <p className="text-center font-mono text-xs text-muted">
-        Already on the path?{" "}
-        <Link href="/login" className="text-gold hover:underline">
+      <p className="text-center text-sm text-body">
+        Already have an account?{" "}
+        <Link href="/login" className="font-semibold text-brand-700 hover:underline">
           Log in
         </Link>
       </p>
     </AuthShell>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense>
+      <SignUpForm />
+    </Suspense>
   );
 }

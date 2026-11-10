@@ -1,85 +1,101 @@
-# The Path — Certification Tracker
+# Path Academy
 
-A free, deploy-ready web app built from the "Zero to Junior IT Support in 6 Months" roadmap.
-Visitors see a live, public count of learners, badges earned, and site visits (social proof to
-pull people in). Anyone can sign up with a username + email + password and check off every badge
-and task as they go — progress is saved to their account.
+A free learning academy that organizes courses from their original creators (Cisco Networking
+Academy, Linux Foundation, IBM SkillsBuild, AWS, …) and lets learners track their progress task
+by task until they earn each badge.
 
-**Stack:** Next.js 14 (App Router) · Supabase (auth + Postgres) · Tailwind CSS · deploys to Vercel.
-
----
-
-## What you get
-
-- **Landing page** — hero with live collective stats and the full 6-month roadmap.
-- **Auth** — email/password sign up + log in (Supabase).
-- **Dashboard** — personal progress ring, badge/task checklist, auto-saved per user.
-- **Public counters** — learners, collective badges earned, and visit count, shown to everyone.
+**Stack:** Next.js 14 (App Router) · Supabase (auth, Postgres, storage) · Tailwind CSS · Vercel.
 
 ---
 
-## 1. Create the Supabase project
+## Features
 
-1. Go to [supabase.com](https://supabase.com) → **New project**. Pick a name and a strong DB
-   password. Wait for it to provision.
-2. Open **SQL Editor → New query**, paste the entire contents of [`supabase/schema.sql`](./supabase/schema.sql),
-   and click **Run**. This creates the tables, security rules, the auto-profile trigger, and the
-   two public functions (`get_public_stats`, `increment_visits`).
-3. **Recommended for a smooth signup:** go to **Authentication → Providers → Email** and turn
-   **OFF** "Confirm email." New users then get access instantly. (Leave it on if you prefer email
-   confirmation — the app handles both; the `/auth/callback` route completes the confirmation link.)
-4. Grab your keys from **Project Settings → API**: the **Project URL** and the **anon public** key.
+**For learners**
+- **Course catalog** (`/courses`): list/grid view, search, sorting, pagination, and filters for
+  category, provider, level, price and "my progress".
+- **Course page** (`/courses/[slug]`): cover picture, description, "what you'll learn", the
+  **badge you'll earn**, a **Go to course** button that links to the original creator, and a
+  checklist. Each task you tick raises the course's progress %, and the badge lights up at 100%.
+- **My learning dashboard** (`/dashboard`): overall progress ring, stats, continue-learning cards,
+  a **badge wall**, learning-path progress, completed courses and recommendations.
+- **Learning paths** (`/paths`): courses in a guided order, grouped by stage (e.g. *Month 1*).
+- **Free resources** (`/resources`): YouTube channels and playlists.
+
+**For you (admin)** at `/admin`
+- Add or edit courses: title, provider, link, category, level, hours, language, price,
+  description, outcomes, published/featured.
+- Upload a **course picture** and a **badge image**, or paste their URLs. A course with no cover
+  gets a colourful generated cover with its badge in the middle.
+- Build each course's **to-do checklist**: add tasks one at a time, or paste a whole list at
+  once. You can edit, reorder and delete tasks, and add an optional link to each.
+- Build **learning paths** and order their courses by stage.
+- See learner, enrollment and task-completion counts, plus your newest learners.
+
+## Data model
+
+| Table | What it holds |
+|---|---|
+| `profiles` | one row per user; `role` is `student` or `admin` |
+| `courses` | the catalog, with each course linked to its original creator through `course_url` |
+| `course_tasks` | the checklist items for each course |
+| `enrollments` | the courses in each learner's "my learning" list |
+| `task_progress` | one row per completed task per learner |
+| `paths`, `path_courses` | learning paths and their ordered courses |
+
+Progress for a course = completed tasks ÷ total tasks. A badge counts as earned when every task of
+its course is done. All access is protected by row-level security: learners only see their own
+progress, and only admins can write to courses, tasks or paths, or upload media.
+
+---
+
+## 1. Set up Supabase
+
+1. Create a project at [supabase.com](https://supabase.com).
+2. In **SQL Editor**, run these files in order:
+   1. [`supabase/schema.sql`](./supabase/schema.sql) creates the tables, security rules, functions
+      and the `course-media` storage bucket.
+   2. [`supabase/seed.sql`](./supabase/seed.sql) adds the starter catalog: 20 courses, 115 tasks
+      and the "Zero to Junior IT Support" path. It's optional, and safe to re-run.
+   3. [`supabase/migrate-from-v1.sql`](./supabase/migrate-from-v1.sql) is **only needed if you're
+      upgrading the old cert-path-tracker**. It converts every learner's old ticks into the new
+      task progress and enrollments.
+3. Optional: under **Authentication → Providers → Email**, turn off "Confirm email" so new users
+   get in straight away.
+4. Copy the **Project URL** and **anon key** from **Project Settings → API**.
 
 ## 2. Run locally
 
 ```bash
 npm install
-cp .env.local.example .env.local      # then fill in the two values from step 1.4
+cp .env.local.example .env.local   # fill in the two values
 npm run dev
 ```
 
-Open http://localhost:3000.
+## 3. Make yourself admin
 
-`.env.local`:
+Sign up in the app, then run this in the SQL Editor:
 
+```sql
+update public.profiles set role = 'admin' where email = 'you@example.com';
 ```
-NEXT_PUBLIC_SUPABASE_URL=https://YOUR-REF.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR-ANON-KEY
-```
 
-Both are safe to expose in the browser — row-level security protects the data.
+Reload the page. **Admin** now appears in the navigation. Learners can't give themselves this role,
+because the database only lets them update their own `username`.
 
-## 3. Deploy to Vercel
+## 4. Deploy to Vercel
 
-1. Push this folder to a GitHub repo.
-2. On [vercel.com](https://vercel.com) → **Add New → Project** → import the repo.
-3. Under **Environment Variables**, add the same two keys:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-4. **Deploy.**
-5. In Supabase → **Authentication → URL Configuration**, set **Site URL** to your Vercel domain
-   (e.g. `https://your-app.vercel.app`) and add it under **Redirect URLs** too. This makes
-   email-confirmation links (if enabled) point back to your live site.
-
-That's it — every push to `main` redeploys automatically.
+Import the repo into Vercel and add `NEXT_PUBLIC_SUPABASE_URL` and
+`NEXT_PUBLIC_SUPABASE_ANON_KEY`. Then, in Supabase under **Authentication → URL Configuration**,
+set the Site URL and Redirect URLs to your Vercel domain.
 
 ---
 
-## How progress & counts work
+## Customizing
 
-- **Progress** lives in the `progress` table, one row per completed item, locked to each user by
-  row-level security. The dashboard reads/writes it directly from the browser.
-- **User count** = rows in `profiles` (auto-created by a trigger on signup).
-- **Badges earned together** = all `progress` rows of type `badge`, summed across everyone.
-- **Visits** = a single `counters` row, bumped once per browser session via the
-  `increment_visits` function (so a reload doesn't inflate it).
-
-The roadmap content is in [`lib/roadmap.ts`](./lib/roadmap.ts). Edit labels, links, or items there.
-**Don't change existing item `id`s** once people have progress — ids are how completions are stored.
-
-## Notes
-
-- No secret keys are shipped to the browser; only the anon key, which is designed to be public.
-- If the stat figures show `—`, the env vars aren't set or the SQL hasn't been run yet.
-- Tailwind, fonts, and the dossier/gold theme live in `tailwind.config.ts`, `app/globals.css`,
-  and `app/layout.tsx`.
+- **Name and copy:** `lib/site.ts`
+- **Colours:** `tailwind.config.ts` (`brand` scale) and `app/globals.css`
+- **Category cover colours:** `lib/categories.ts`. A category you invent gets a colour
+  automatically.
+- **Fonts:** self-hosted through `@fontsource-variable`, so they need no network access at build
+  time.
+- **Starter badge images:** `public/badges/*.png`

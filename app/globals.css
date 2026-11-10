@@ -3,7 +3,9 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+  --font-display: "Plus Jakarta Sans Variable";
+  --font-body: "Inter Variable";
 }
 
 html {
@@ -11,26 +13,19 @@ html {
 }
 
 body {
-  background-color: #0e1116;
-  color: #e8e6df;
-  /* Subtle dossier grid — quiet, never decorative noise. */
-  background-image:
-    linear-gradient(to right, rgba(35, 42, 51, 0.35) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(35, 42, 51, 0.35) 1px, transparent 1px);
-  background-size: 56px 56px;
-  background-position: center top;
+  background-color: #f7f7fb;
+  color: #17133a;
 }
 
 ::selection {
-  background: #e0a82e;
-  color: #0e1116;
+  background: #d7ccff;
+  color: #17133a;
 }
 
-/* Thin gold focus ring for keyboard users */
 *:focus-visible {
-  outline: 2px solid #e0a82e;
+  outline: 2px solid #7350f2;
   outline-offset: 2px;
-  border-radius: 2px;
+  border-radius: 6px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -44,11 +39,41 @@ body {
   }
 }
 
-/* Eyebrow / label utility used across the app */
-.eyebrow {
-  font-family: var(--font-mono), monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: #8b95a1;
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+  .card {
+    @apply rounded-2xl border border-line bg-white shadow-card;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply btn bg-brand-600 text-white shadow-sm hover:bg-brand-700;
+  }
+  .btn-soft {
+    @apply btn bg-brand-50 text-brand-700 hover:bg-brand-100;
+  }
+  .btn-ghost {
+    @apply btn border border-line bg-white text-ink hover:border-brand-300 hover:text-brand-700;
+  }
+  .btn-danger {
+    @apply btn border border-red-200 bg-white text-red-600 hover:bg-red-50;
+  }
+  .input {
+    @apply w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm text-ink placeholder:text-body/60 focus:border-brand-400 focus:outline-none focus:ring-4 focus:ring-brand-100;
+  }
+  .label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-body;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold;
+  }
+  .hero-band {
+    background:
+      radial-gradient(1200px 400px at 85% -10%, rgba(255, 255, 255, 0.18), transparent 60%),
+      radial-gradient(800px 300px at 10% 120%, rgba(255, 255, 255, 0.12), transparent 60%),
+      linear-gradient(115deg, #5b33de 0%, #7350f2 45%, #8b5cf6 100%);
+  }
 }
